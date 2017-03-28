@@ -39,6 +39,7 @@ class UserLoginHandler {
     let PASSWORD = "pwd"
     let CODE = "code"
     let STATUS = "status"
+    let ROLL = "roll"
     
     func handler(data:[String:Any]) throws -> RequestHandler {
         return {
@@ -51,7 +52,7 @@ class UserLoginHandler {
                 paraments[key] = value
             }
             
-            guard paraments.keys.count > 1 else {
+            guard paraments.keys.count > 2 else {
                 jsonData[self.CODE] = LoginError.ParamentMissError.rawValue
                 let _ = try? response.setBody(json: jsonData)
                 response.completed()
@@ -59,7 +60,8 @@ class UserLoginHandler {
             }
             
             guard paraments.keys.contains(self.USERNAME) &&
-                  paraments.keys.contains(self.PASSWORD) else {
+                  paraments.keys.contains(self.PASSWORD) &&
+                  paraments.keys.contains(self.ROLL) else {
                 jsonData[self.CODE] = LoginError.ParamentMissError.rawValue
                 let _ = try? response.setBody(json: jsonData)
                 response.completed()
@@ -67,7 +69,8 @@ class UserLoginHandler {
             }
             
             guard let _ = paraments[self.USERNAME]?.characters.count,
-                  let _ = paraments[self.PASSWORD]?.characters.count
+                  let _ = paraments[self.PASSWORD]?.characters.count,
+                  let _ = paraments[self.ROLL]?.characters.count
             else {
                 jsonData[self.CODE] = LoginError.ParamentMissError.rawValue
                 let _ = try? response.setBody(json: jsonData)
@@ -75,7 +78,8 @@ class UserLoginHandler {
                 return
             }
             
-            if !myDatabase.query(statement: "select name,password from reg_stu where name=\"\(paraments[self.USERNAME]!)\" and password=\"\(paraments[self.PASSWORD]!)\"") {
+            let tableName = paraments[self.ROLL] == "0" ? "reg_stu" : "reg_teacher"
+            if !myDatabase.query(statement: "select name,password from \(tableName) where name=\"\(paraments[self.USERNAME]!)\" and password=\"\(paraments[self.PASSWORD]!)\"") {
                 jsonData[self.CODE] = LoginError.DataBaseQueryError.rawValue
                 let _ = try? response.setBody(json: jsonData)
                 response.completed()
