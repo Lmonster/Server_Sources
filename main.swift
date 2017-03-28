@@ -17,39 +17,10 @@
 //===----------------------------------------------------------------------===//
 //
 
+import MySQL
 import PerfectLib
 import PerfectHTTP
 import PerfectHTTPServer
-
-// An example request handler.
-// This 'handler' function can be referenced directly in the configuration below.
-func handler(data: [String:Any]) throws -> RequestHandler {
-	return {
-		request, response in
-		// Respond with a simple message.
-        var requestString:[String:String] = [String:String]()
-        let userInfo = request.postParams
-        if userInfo.count == 0 {
-            requestString["status"] = "-2"
-            requestString["msg"] = "no parament"
-        } else {
-            let username = userInfo[0].1
-            let password = userInfo[1].1
-            if username == "11" && password == "11" {
-                requestString["status"] = "0"
-                requestString["msg"] = "success"
-            } else {
-                requestString["status"] = "-1"
-                requestString["msg"] = "username or password error"
-            }
-        }
-		response.setHeader(.contentType, value: "text/plain")
-        response.setHeader(.accessControlAllowOrigin, value: "*")
-        _ = try? response.setBody(json: requestString)
-		// Ensure that response.completed() is called when your processing is done.
-		response.completed()
-	}
-}
 
 // Configuration data for two example servers.
 // This example configuration shows how to launch one or more servers 
@@ -68,7 +39,7 @@ let confData = [
 			"name":"192.168.1.103",
 			"port":port1,
 			"routes":[
-				["method":["post","get"], "uri":"/", "handler":handler],
+				["method":"post", "uri":"/api/stu/login", "handler":UserLoginHandler().handler],
 				["method":"get", "uri":"/**", "handler":PerfectHTTPServer.HTTPHandler.staticFiles,
 				 "documentRoot":"/Users/lmonster/www",
 				 "allowResponseFilters":true]
