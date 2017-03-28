@@ -39,7 +39,8 @@ let confData = [
 			"name":"192.168.1.103",
 			"port":port1,
 			"routes":[
-				["method":"post", "uri":"/api/stu/login", "handler":UserLoginHandler().handler],
+				["method":"post", "uri":"/api/login", "handler":UserLoginHandler().handler],
+				["method":"post", "uri":"/api/register","handler":UserRegisterHandler().handler],
 				["method":"get", "uri":"/**", "handler":PerfectHTTPServer.HTTPHandler.staticFiles,
 				 "documentRoot":"/Users/lmonster/www",
 				 "allowResponseFilters":true]

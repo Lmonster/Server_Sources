@@ -26,25 +26,19 @@ import PerfectHTTP
  *
  */
 enum LoginError:Int, Error {
-    case NoError = 0
-    case ParamentMissError = -1000
-    case ParamentNotMatchError = -1001
-    case UserNotExits = -1002
-    case DataBaseConnectError = -1003
-    case DataBaseQueryError = -1004
+    case no = 0
+    case paramentMiss = -1000
+    case userNotExits = -1001
+    case dataBaseConnect = -1002
+    case dataBaseQuery = -1003
 }
 
 class UserLoginHandler {
-    let USERNAME = "uName"
-    let PASSWORD = "pwd"
-    let CODE = "code"
-    let STATUS = "status"
-    let ROLL = "roll"
     
     func handler(data:[String:Any]) throws -> RequestHandler {
         return {
             request,response in
-            var jsonData = [self.CODE:LoginError.NoError.rawValue]
+            var jsonData = [Constant.CODE:LoginError.no.rawValue]
             response.setHeader(.contentType, value: "application/json")
             let postedInfo = request.postParams
             var paraments = [String:String]()
@@ -53,50 +47,41 @@ class UserLoginHandler {
             }
             
             guard paraments.keys.count > 2 else {
-                jsonData[self.CODE] = LoginError.ParamentMissError.rawValue
+                jsonData[Constant.CODE] = LoginError.paramentMiss.rawValue
                 let _ = try? response.setBody(json: jsonData)
                 response.completed()
                 return
             }
             
-            guard paraments.keys.contains(self.USERNAME) &&
-                  paraments.keys.contains(self.PASSWORD) &&
-                  paraments.keys.contains(self.ROLL) else {
-                jsonData[self.CODE] = LoginError.ParamentMissError.rawValue
-                let _ = try? response.setBody(json: jsonData)
-                response.completed()
-                return
-            }
-            
-            guard let _ = paraments[self.USERNAME]?.characters.count,
-                  let _ = paraments[self.PASSWORD]?.characters.count,
-                  let _ = paraments[self.ROLL]?.characters.count
+            guard let _ = paraments[Constant.ID]?.characters.count,
+                  let _ = paraments[Constant.PASSWORD]?.characters.count,
+                  let _ = paraments[Constant.ROLL]?.characters.count
             else {
-                jsonData[self.CODE] = LoginError.ParamentMissError.rawValue
+                jsonData[Constant.CODE] = LoginError.paramentMiss.rawValue
                 let _ = try? response.setBody(json: jsonData)
                 response.completed()
                 return
             }
             
-            let tableName = paraments[self.ROLL] == "0" ? "reg_stu" : "reg_teacher"
-            if !myDatabase.query(statement: "select name,password from \(tableName) where name=\"\(paraments[self.USERNAME]!)\" and password=\"\(paraments[self.PASSWORD]!)\"") {
-                jsonData[self.CODE] = LoginError.DataBaseQueryError.rawValue
+            let roll = paraments[Constant.ROLL] == "0" ? "stu" : "teacher"
+            if !myDatabase.query(statement: "select name,password from reg_\(roll) where \(roll)_id=\"\(paraments[Constant.ID]!)\" and password=\"\(paraments[Constant.PASSWORD]!)\"") {
+                jsonData[Constant.CODE] = LoginError.dataBaseQuery.rawValue
                 let _ = try? response.setBody(json: jsonData)
                 response.completed()
                 return
             } else {
                 guard let result = myDatabase.storeResults() else {
-                    jsonData[self.CODE] = LoginError.DataBaseQueryError.rawValue
+                    jsonData[Constant.CODE] = LoginError.dataBaseQuery.rawValue
                     let _ = try? response.setBody(json: jsonData)
                     response.completed()
                     return
                 }
                 if result.numRows() > 0 {
-                    jsonData[self.CODE] = LoginError.NoError.rawValue
+                    jsonData[Constant.CODE] = LoginError.no.rawValue
                     let _ = try? response.setBody(json: jsonData)
                     response.completed()
                 } else {
-                    jsonData[self.CODE] = LoginError.UserNotExits.rawValue
+                    jsonData[Constant.CODE] = LoginError.userNotExits.rawValue
                     let _ = try? response.setBody(json: jsonData)
                     response.completed()
                 }
