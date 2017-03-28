@@ -15,7 +15,8 @@ import PerfectHTTP
  * parament: 
  * {
  *  uName:xxx,
- *  pwd:xxx
+ *  pwd:xxx,
+ *  role:0/1 (0教师，1学生)
  * }
  *
  * return:
@@ -50,7 +51,6 @@ class UserLoginHandler {
                 paraments[key] = value
             }
             
-            // check data
             guard paraments.keys.count > 1 else {
                 jsonData[self.CODE] = LoginError.ParamentMissError.rawValue
                 let _ = try? response.setBody(json: jsonData)
@@ -75,26 +75,16 @@ class UserLoginHandler {
                 return
             }
             
-            let sql = DataBase.shared()
-            guard sql.connect(host: "127.0.0.1", user: "lmonster", password: "iosdev,", db: "bilingual", port: 3306) else {
-                jsonData[self.CODE] = LoginError.DataBaseConnectError.rawValue
-                let _ = try? response.setBody(json: jsonData)
-                response.completed()
-                return
-            }
-            
-            if !sql.query(statement: "select name,password from reg_stu where name=\"\(paraments[self.USERNAME]!)\" and password=\"\(paraments[self.PASSWORD]!)\"") {
+            if !myDatabase.query(statement: "select name,password from reg_stu where name=\"\(paraments[self.USERNAME]!)\" and password=\"\(paraments[self.PASSWORD]!)\"") {
                 jsonData[self.CODE] = LoginError.DataBaseQueryError.rawValue
                 let _ = try? response.setBody(json: jsonData)
                 response.completed()
-                sql.close()
                 return
             } else {
-                guard let result = sql.storeResults() else {
+                guard let result = myDatabase.storeResults() else {
                     jsonData[self.CODE] = LoginError.DataBaseQueryError.rawValue
                     let _ = try? response.setBody(json: jsonData)
                     response.completed()
-                    sql.close()
                     return
                 }
                 if result.numRows() > 0 {
@@ -106,7 +96,6 @@ class UserLoginHandler {
                     let _ = try? response.setBody(json: jsonData)
                     response.completed()
                 }
-                sql.close()
             }
         }
     }

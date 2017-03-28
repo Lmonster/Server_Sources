@@ -65,10 +65,12 @@ let confData = [
 	]
 ]
 
-do {
-	// Launch the servers based on the configuration data.
-	try HTTPServer.launch(configurationData: confData)
-} catch {
-	fatalError("\(error)") // fatal error launching one of the servers
+let myDatabase = MySQL()
+if myDatabase.connect(host: "127.0.0.1", user: "lmonster", password: "iosdev,", db: "bilingual", port: 3306) {
+    do {
+        try HTTPServer.launch(configurationData: confData)
+    } catch {
+        fatalError("\(error)") // fatal error launching one of the servers
+    }
 }
 
