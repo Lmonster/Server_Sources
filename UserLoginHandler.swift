@@ -40,6 +40,7 @@ class UserLoginHandler {
             request,response in
             var jsonData = [Constant.CODE:LoginError.no.rawValue]
             response.setHeader(.contentType, value: "application/json")
+            response.setHeader(.accessControlAllowOrigin, value: "*")
             let postedInfo = request.postParams
             var paraments = [String:String]()
             for (key,value) in postedInfo {

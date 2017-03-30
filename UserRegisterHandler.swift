@@ -22,6 +22,7 @@ class UserRegisterHandler {
         return {
             request,response in
             response.setHeader(.contentType, value: "application/json")
+            response.setHeader(.accessControlAllowOrigin, value: "*")
             var parament = [String:String]()
             var jsonData = [String:Int]()
             jsonData[Constant.CODE] = RegisterError.no.rawValue
